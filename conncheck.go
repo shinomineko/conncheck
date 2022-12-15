@@ -20,28 +20,32 @@ func testConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	destination := r.FormValue("destination")
+	dest := r.FormValue("destination")
 
-	_, err := net.DialTimeout("tcp", destination, time.Second*10)
+	_, err := net.DialTimeout("tcp", dest, time.Second*5)
 	if err != nil {
 		tmpl.Execute(w, struct {
 			Success     bool
 			Destination string
 			Error       error
-		}{false, destination, err})
-		log.Printf("Error dialing %s: %s", destination, err)
+		}{false, dest, err})
+		log.Printf("Error dialing %s: %s", dest, err)
 		return
 	}
 
 	tmpl.Execute(w, struct {
 		Success     bool
 		Destination string
-	}{true, destination})
-	log.Printf("Successfully connected to %s", destination)
+	}{true, dest})
+	log.Printf("Successfully connected to %s", dest)
 }
 
 func main() {
 	http.HandleFunc("/", testConnection)
-	log.Print("Running on 8080")
-	http.ListenAndServe(":8080", nil)
+
+	log.Print("Starting on :8080")
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatalf("Error starting server: %s", err)
+	}
 }
