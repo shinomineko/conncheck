@@ -4,7 +4,6 @@ WORKDIR /work
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o ./conncheck
 
-
 FROM cgr.dev/chainguard/static:latest
 
 COPY --from=build /work/conncheck /conncheck
