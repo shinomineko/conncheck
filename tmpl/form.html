@@ -1,0 +1,19 @@
+<html>
+	<head>
+		<title>Connection Checker</title>
+	</head>
+	<body>
+		<p>Default timeout is 10 seconds</p>
+		<form action="/" method="POST">
+			<label for="destination">Destination (hostname/ip:port):</label><br>
+			<input type="text" id="destination" name="destination"><br>
+			<input type="submit" value="Check">
+		</form>
+
+		{{if .Success}}
+			<p>Successfully connected to {{.Destination}}</p>
+		{{else if .Error}}
+			<p>Error dialing {{.Destination}}: {{.Error}}</p>
+		{{end}}
+	</body>
+</html>
