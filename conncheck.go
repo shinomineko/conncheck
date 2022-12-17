@@ -2,10 +2,12 @@ package main
 
 import (
 	"embed"
+	"html"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -21,23 +23,25 @@ func testConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dest := r.FormValue("destination")
+	escapedDest := strings.Replace(dest, "\n", "", -1)
+	escapedDest = strings.Replace(escapedDest, "\r", "", -1)
 
-	_, err := net.DialTimeout("tcp", dest, time.Second*5)
+	_, err := net.DialTimeout("tcp", escapedDest, time.Second*5)
 	if err != nil {
 		tmpl.Execute(w, struct {
 			Success     bool
 			Destination string
 			Error       error
-		}{false, dest, err})
-		log.Printf("Error dialing %s: %s", dest, err)
+		}{false, html.EscapeString(dest), err})
+		log.Printf("Error dialing %s: %s", escapedDest, err)
 		return
 	}
 
 	tmpl.Execute(w, struct {
 		Success     bool
 		Destination string
-	}{true, dest})
-	log.Printf("Successfully connected to %s", dest)
+	}{true, html.EscapeString(dest)})
+	log.Printf("Successfully connected to %s", escapedDest)
 }
 
 func main() {
