@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,8 +18,15 @@ var formTmpl embed.FS
 func testConnection(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFS(formTmpl, "tmpl/form.html"))
 
+	nodeName := os.Getenv("NODE_NAME")
+	if nodeName == "" {
+		nodeName, _ = os.Hostname()
+	}
+
 	if r.Method != http.MethodPost {
-		tmpl.Execute(w, nil)
+		tmpl.Execute(w, struct {
+			NodeName string
+		}{nodeName})
 		return
 	}
 
@@ -29,18 +37,20 @@ func testConnection(w http.ResponseWriter, r *http.Request) {
 	_, err := net.DialTimeout("tcp", escapedDest, time.Second*5)
 	if err != nil {
 		tmpl.Execute(w, struct {
+			NodeName    string
 			Success     bool
 			Destination string
 			Error       error
-		}{false, html.EscapeString(dest), err})
+		}{nodeName, false, html.EscapeString(dest), err})
 		log.Printf("Error dialing %s: %s", escapedDest, err)
 		return
 	}
 
 	tmpl.Execute(w, struct {
+		NodeName    string
 		Success     bool
 		Destination string
-	}{true, html.EscapeString(dest)})
+	}{nodeName, true, html.EscapeString(dest)})
 	log.Printf("Successfully connected to %s", escapedDest)
 }
 

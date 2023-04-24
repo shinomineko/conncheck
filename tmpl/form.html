@@ -4,6 +4,9 @@
 	</head>
 	<body>
 		<p>Default timeout is 5 seconds</p>
+		{{if .NodeName}}
+		<p>Running on {{.NodeName}}</p>
+		{{end}}
 		<form action="/" method="POST">
 			<label for="destination">Destination (hostname/ip:port):</label><br>
 			<input type="text" id="destination" name="destination">
