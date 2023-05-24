@@ -3,7 +3,7 @@
 		<title>Connection Checker</title>
 	</head>
 	<body>
-		<p>Default timeout is 5 seconds</p>
+		<p>Default timeout is {{.DefaultTimeoutSeconds}} seconds</p>
 		{{if .NodeName}}
 		<p>Running on {{.NodeName}}</p>
 		{{end}}
