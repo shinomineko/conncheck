@@ -4,13 +4,15 @@ import (
 	"embed"
 	"html"
 	"html/template"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 )
+
+var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 //go:embed tmpl/form.html
 var formTmpl embed.FS
@@ -46,7 +48,7 @@ func testConnection(w http.ResponseWriter, r *http.Request) {
 			Destination           string
 			Error                 error
 		}{defaultTimeoutSeconds, nodeName, false, html.EscapeString(dest), err})
-		log.Printf("Error dialing %s: %s", escapedDest, err)
+		logger.Error("Error dialing", "dest", escapedDest, "error", err)
 		return
 	}
 
@@ -56,15 +58,15 @@ func testConnection(w http.ResponseWriter, r *http.Request) {
 		Success               bool
 		Destination           string
 	}{defaultTimeoutSeconds, nodeName, true, html.EscapeString(dest)})
-	log.Printf("Successfully connected to %s", escapedDest)
+	logger.Info("Successfully connected", "dest", escapedDest)
 }
 
 func main() {
 	http.HandleFunc("/", testConnection)
 
-	log.Print("Starting on :8080")
+	logger.Info("Starting on :8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		log.Fatalf("Error starting server: %s", err)
+		logger.Error("Error starting server", "error", err)
 	}
 }
